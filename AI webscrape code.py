@@ -41,14 +41,14 @@ stopwords = stopwords.words('english')      # set as English
 
 from google.colab import drive
 drive.mount('/content/drive')
-%cd /content/drive/MyDrive/Colab/DAI_AID/
+%cd <your/Drive/path/here>
 
-f = open("keys/openai_key.txt", "r")
+f = open("<your openai key path here>", "r")
 openaikey = f.readlines()[0]
 f.close()
 os.environ["OPENAI_API_KEY"] = openaikey            # LangChain requires API key in environment
 
-f = open("keys/google_key.txt", "r")
+f = open("<your google api key path here>", "r")
 googlekey = f.readlines()[0]
 f.close()
 youtube = build('youtube', 'v3', developerKey=googlekey)
@@ -158,38 +158,32 @@ for URL in links:
         text[i] = re.sub(r'\&.*?\;', '', str(text[i]))  # identifies the pattern that has those symbols, replaces them with an empty slot, then return the rest of the string text as it is
         text[i] = text[i].replace('\n', '') # replace any new lines with blank slot
         baseline.append(text[i])    # add this to the list
-    with open('support/_current_/parts.txt', 'w', newline='') as f:  # making the file
+    with open('<path>/parts.txt', 'w', newline='') as f:  # making the file
         for i in baseline:
             f.write(i + "\n")
-    base = open('support/_current_/parts.txt', 'r+')
+    base = open('<path>/parts.txt', 'r+')
     basecase = base.read()
     keyphrases = extractor(basecase)
-    with open('support/_current_/classification.txt', 'a', newline='') as f:  # making the file
+    with open('<path>/classification.txt', 'a', newline='') as f:  # making the file
         for i in keyphrases:
             f.write(str(i) + "\n")
-classifi = open('support/_current_/classification.txt', 'r+')
+classifi = open('<path>/classification.txt', 'r+')
 classification = classifi.read()
 
 search_terms = 'classification'
 try:                                              # Create directory named after search terms, just to make sure it already exists, and creates one if it does not
-    os.makedirs("support/%s" % search_terms)
+    os.makedirs("<path>/%s" % search_terms)
     print("Directory", search_terms, "created")
 except FileExistsError:
     print("Directory", search_terms, "exists")
 
 #making pickle files
-pickle.dump(classification, open("support/_current_/classification.pkl", "wb"))
+pickle.dump(classification, open("<path>/classification.pkl", "wb"))
 # w: This indicates that the file is being opened for writing. If the file does not exist, it will be created. If the file does exist, it will be truncated (i.e., cleared) before writing.
 # b: This indicates that the file is being opened in binary mode. Binary mode is used when dealing with non-text files, such as images, audio, or serialized Python objects (like when using pickle). In binary mode, no newline translations are performed, and data is written and read in binary format.
 
-f = open("keys/openai_key.txt", "r")
-key = f.readlines()[0]
-f.close()
-
-os.environ["OPENAI_API_KEY"] = key            # LangChain requires API key in environment
-
 #sentence splitting
-loader = TextLoader("support/_current_/classification.txt")
+loader = TextLoader("<path>/classification.txt")
 document = loader.load()
 text_splitter = CharacterTextSplitter( #splits by seperator terms '\n'
     separator='\n',
@@ -201,10 +195,10 @@ splits = text_splitter.split_documents(document) #creates splits for later initi
 embedding = OpenAIEmbeddings()
 #reinitialise folder
 try:
-    shutil.rmtree('support/%s/persist' % search_terms)       # remove old version
+    shutil.rmtree('<path>/%s/persist' % search_terms)       # remove old version
 except:
     pass
-persist_directory = 'support/%s/persist' % search_terms     # create new version
+persist_directory = '<path>/%s/persist' % search_terms     # create new version
 
 vectordb = Chroma.from_documents(
     documents=splits,                           # target the splits created from the documents loaded
@@ -294,8 +288,8 @@ for i in range(len(text)):  # for each index in the list "text"
     text[i] = re.sub(r'\&.*?\;', '', str(text[i]))  # identifies the pattern that has those symbols, replaces them with an empty slot, then return the rest of the string text as it is
     text[i] = text[i].replace('\n', '') # replace any new lines with blank slot
     mysite.append(text[i])    # add this to the list
-    filename = 'support/_current_/mysite.txt'    # initialise csv file name
-    with open('support/_current_/mysite.txt', 'w', newline='') as f:  # making the file
+    filename = '<path>/mysite.txt'    # initialise csv file name
+    with open('<path>/mysite.txt', 'w', newline='') as f:  # making the file
       for i in mysite:
           f.write(i)
           f.write('\n')
@@ -338,11 +332,11 @@ for l in single_vid_full_captions_list:
     o = text_splitter.split_text(o)[:2]
     for i in o:
       list_of_video_captions.append(i)
-with open('support/_current_/list_of_video_captions.txt', 'w', newline='') as f:  # making the file
+with open('<path>/list_of_video_captions.txt', 'w', newline='') as f:  # making the file
   for h in list_of_video_captions:
       f.write(h)
       f.write('\n')
-competitors = open('support/_current_/list_of_video_captions.txt', 'r+')
+competitors = open('<path>/list_of_video_captions.txt', 'r+')
 
 for i in range(len(vid_id)): #for each video
     try:                                        # use try/except as some "comments are turned off"
@@ -394,33 +388,33 @@ for k in range(len(comment_resp)):
             print("missing comment")                              # or too many comments (e.g. 7.3K comments)
 
 try:                                              # Create directory named after search terms
-    os.makedirs("support/%s" % search_terms)
+    os.makedirs("<path>/%s" % search_terms)
     print("Directory", search_terms, "created")
 except FileExistsError:
     print("Directory", search_terms, "exists")
 
 try:                                              # Create directory to store current search terms
-    os.makedirs("support/_current_")
-    print("Directory _current_ created")
+    os.makedirs("<path>")
+    print("Directory <path> created")
 except FileExistsError:
-    print("Directory _current_ exists")
+    print("Directory <path> exists")
 
-f = open("support/%s/comments.txt" % search_terms, "w+")
+f = open("<path>/%s/comments.txt" % search_terms, "w+")
 for i in range(len(comment_list)):
     f.write("<<<" + comment_list[i] + ">>>")
 f.close()
 
-pickle.dump(search_terms, open("support/%s/searchTerms.pkl" % search_terms, "wb"))
-pickle.dump(comment_list, open("support/%s/comment_list.pkl" % search_terms, "wb"))
-pickle.dump(vid_title, open("support/%s/vid_title.pkl" % search_terms, "wb"))
-pickle.dump(vid_page, open("support/%s/vid_page.pkl" % search_terms, "wb"))
-pickle.dump(vid_id, open("support/%s/vid_id.pkl" % search_terms, "wb"))
+pickle.dump(search_terms, open("<path>/%s/searchTerms.pkl" % search_terms, "wb"))
+pickle.dump(comment_list, open("<path>/%s/comment_list.pkl" % search_terms, "wb"))
+pickle.dump(vid_title, open("<path>/%s/vid_title.pkl" % search_terms, "wb"))
+pickle.dump(vid_page, open("<path>/%s/vid_page.pkl" % search_terms, "wb"))
+pickle.dump(vid_id, open("<path>/%s/vid_id.pkl" % search_terms, "wb"))
 
-source = "support/%s/comments.txt" % search_terms
-destination = "support/_current_/comments.txt"
+source = "<path>/%s/comments.txt" % search_terms
+destination = "<path>/comments.txt"
 shutil.copyfile(source, destination)
 
-pickle.dump(search_terms, open("support/_current_/searchTerms.pkl", "wb"))
+pickle.dump(search_terms, open("<path>/searchTerms.pkl", "wb"))
 
 for i in range(len(comment_list)):        # translate all
     try:
@@ -438,15 +432,15 @@ all_comments = combine_text(comment_list)
 all_comments = " ".join(word for word in all_comments.split() if word not in stopwords)
 
 #making pickle files
-pickle.dump(search_terms, open("support/%s/searchTerms.pkl" % search_terms, "wb"))
-pickle.dump(comment_list, open("support/%s/comments.pkl" % search_terms, "wb"))
+pickle.dump(search_terms, open("<path>/%s/searchTerms.pkl" % search_terms, "wb"))
+pickle.dump(comment_list, open("<path>/%s/comments.pkl" % search_terms, "wb"))
 
-pickle.dump(search_terms, open("support/_current_/searchTerms.pkl", "wb"))
+pickle.dump(search_terms, open("<path>/searchTerms.pkl", "wb"))
 
 # Creating a list of filenames
-filenames = ['support/_current_/mysite.txt','support/_current_/list_of_video_captions.txt', 'support/_current_/comments.txt']
+filenames = ['<path>/mysite.txt','<path>/list_of_video_captions.txt', '<path>/comments.txt']
 # Open file3 in write mode
-with open('support/_current_/features.txt', 'w') as outfile:
+with open('<path>/features.txt', 'w') as outfile:
     # Iterate through list
     for names in filenames:
         # Open each file in read mode
@@ -457,13 +451,13 @@ with open('support/_current_/features.txt', 'w') as outfile:
         # Add '\n' to enter data of file2
         # from next line
         outfile.write("\n")
-with open('support/_current_/features.txt', 'r') as outfile:
+with open('<path>/features.txt', 'r') as outfile:
     # Read the contents of the file
     outfile_contents = outfile.read()
-    pickle.dump(outfile_contents, open("support/_current_/features.pkl", "wb"))
+    pickle.dump(outfile_contents, open("<path>/features.pkl", "wb"))
 
 #sentence splitting
-loader = TextLoader("support/_current_/features.txt")
+loader = TextLoader("<path>/features.txt")
 document = loader.load()
 text_splitter = CharacterTextSplitter( #splits based on seperator variable
     separator='\n',
@@ -473,12 +467,12 @@ text_splitter = CharacterTextSplitter( #splits based on seperator variable
 splits = text_splitter.split_documents(document)
 #reinitialise folder
 try:
-    shutil.rmtree('support/%s/persist' % search_terms)       # remove old version
+    shutil.rmtree('<path>/%s/persist' % search_terms)       # remove old version
 except:
     pass
-persist_directory = 'support/%s/persist' % search_terms     # create new version
+persist_directory = '<path>/%s/persist' % search_terms     # create new version
 
-features = pd.read_pickle("support/_current_/features.pkl")
+features = pd.read_pickle("<path>/features.pkl")
 candidates = catagories                # replace the candidates to suit your needs
 model = "facebook/bart-large-mnli"
 classifier = pipeline("zero-shot-classification", model=model)
@@ -520,17 +514,17 @@ for c in catagories: #list of classes
       if i["sentiment_label"] == "LABEL_2" and i["sequence"] not in subgroup2_parts: #and good, no duplicates
         subgroup2_parts.append(i["sequence"])
 
-f = open("support/_current_/subgroup1_parts.txt", "w+")
+f = open("<path>/subgroup1_parts.txt", "w+")
 for i in range(len(subgroup1_parts)):
     f.write(subgroup1_parts[i])
 f.close()
 
-f = open("support/_current_/subgroup2_parts.txt", "w+")
+f = open("<path>/subgroup2_parts.txt", "w+")
 for i in range(len(subgroup2_parts)):
     f.write(subgroup2_parts[i])
 f.close()
 
-loader = TextLoader("support/_current_/subgroup1_parts.txt")
+loader = TextLoader("<path>/subgroup1_parts.txt")
 document = loader.load()
 text_splitter = CharacterTextSplitter( #splits based on seperator variable
     separator='\n',
@@ -560,10 +554,10 @@ template = " If you don't know the answer, strictly state 'I don't know', instea
 prompt = question + template
 result = qa_chain({"query": prompt})
 
-with open('support/_current_/improvement.txt', 'w', newline='') as f:
+with open('<path>/improvement.txt', 'w', newline='') as f:
     f.write(result['result'])
 
-loader = TextLoader("support/_current_/subgroup2_parts.txt")
+loader = TextLoader("<path>/subgroup2_parts.txt")
 document = loader.load()
 text_splitter = CharacterTextSplitter( #splits based on seperator variable
     separator='\n',
@@ -593,5 +587,5 @@ template = " If you don't know the answer, strictly state 'I don't know', instea
 prompt = question + template
 result = qa_chain({"query": prompt})
 
-with open('support/_current_/addition.txt', 'w', newline='') as f:
+with open('<path>/addition.txt', 'w', newline='') as f:
   f.write(result['result'])
